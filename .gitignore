@@ -4,6 +4,10 @@ dmpls/
 smpl/
 smplh/
 smplx/
+visualizations/
+retarget_input/
+retarget_output/
+MUJOCO_LOG.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

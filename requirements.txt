@@ -1,0 +1,14 @@
+smplx
+mujoco
+numpy==1.19.5
+scipy==1.10.1
+torch==2.0.0
+trimesh==4.2.0
+pandas==1.4.4
+requests==2.32.3
+oauthlib==3.2.2
+protobuf==5.28.1
+pillow==10.4.0
+pytorch_kinematics==0.7.2
+easydict
+chumpy

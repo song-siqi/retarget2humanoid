@@ -13,7 +13,7 @@ from smplx import SMPL, SMPLX, SMPLH
 PI = np.pi
 
 RANGE_BETAS = 5
-TITLE_BETAS = 'betas_r5_smpl_g1_neu2'
+TITLE_BETAS = 'betas_r5_smpl_g1_2'
 
 ROOT_POS = np.array([0.0000, 0.0000, 1.0285])
 ROOT_ORI = np.array([1.0000, 0.0000, 0.0000, 0.0000])
@@ -66,7 +66,7 @@ def load_robot_gt_mujoco():
     # visualize_double(pre_xpos, body_xpos, 'T_pose_default_H1_2')
 
     # keypoint_index = [4, 5, 6, 10, 11, 12, 17, 20, 22, 26, 29, 31]
-    keypoint_index = [3, 5, 7, 9, 11, 13, 18, 20, 23, 25, 27, 30]
+    keypoint_index = [3, 5, 7, 9, 11, 13, 18, 20, 22, 25, 27, 29]
     keypoint_trans = body_xpos[keypoint_index]
     # print(keypoint_trans.shape)
     
@@ -128,13 +128,19 @@ def forward_smpl(model, betas, visualize=False):
     
     return keypoint_trans
 
-def Loss(model, betas, offset, gt):
+def Loss(model, betas, offset, scale, gt):
     betas = torch.clamp(betas, min=-RANGE_BETAS, max=RANGE_BETAS)
     reindex_ids = [2, 0, 1]
     keypoint_trans = forward_smpl(model, betas)[:, reindex_ids] + offset[None, :]
+    keypoint_trans *= scale
     keypoint_gt = gt
 
-    return torch.sum(torch.norm(keypoint_trans - keypoint_gt, dim=-1, p=2))
+    reconstr_loss = torch.sum(torch.norm(keypoint_trans - keypoint_gt, dim=-1, p=2))
+    betas_penalty = torch.sum(torch.norm(betas, dim=-1, p=2))
+    loss = reconstr_loss + 0.01 * betas_penalty
+
+    # return torch.sum(torch.norm(keypoint_trans - keypoint_gt, dim=-1, p=2))
+    return loss
 
 def optim_func(model, param, gt):
     betas = torch.zeros(10)
@@ -143,7 +149,8 @@ def optim_func(model, param, gt):
     return Loss(
         model=model,
         betas=betas.reshape(1, -1),
-        offset=param[10: ],
+        offset=param[10:13],
+        scale=param[13],
         gt=gt
     )
 
@@ -195,7 +202,7 @@ def visualize_double(keypoint1, keypoint2, title='result'):
 
 if __name__ == '__main__':
     model = SMPL(
-        model_path=Path("./human_model/smpl/SMPL_NEUTRAL.pkl"),
+        model_path=Path("./human_model/smpl/SMPL_MALE.pkl"),
         batch_size=1,
         device='cpu'
     )
@@ -204,7 +211,8 @@ if __name__ == '__main__':
     keypoint_trans_gt = torch.from_numpy(keypoint_trans_gt)
     # print(keypoint_trans.shape)
     
-    x = torch.zeros(13)
+    x = torch.zeros(14)
+    x[-1] = 1.0000
     x.requires_grad = True
     # Define the optimizer
     optimizer = torch.optim.Adam([x], lr=0.01)
