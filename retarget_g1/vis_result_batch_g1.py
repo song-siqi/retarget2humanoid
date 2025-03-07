@@ -8,7 +8,7 @@ import argparse
 
 # from motion_lib_retarget import MotionLibRetarget
 
-MOTION_SOURCE = "./retarget_output/charades_example_smpl.npy"
+MOTION_SOURCE = "./retarget_output/Conductor_smpl.npy"
 
 ''' MUJOCO MODEL INITIALIZATION '''
 model = mujoco.MjModel.from_xml_path(r"./humanoid_model/g1/g1_29dof_rev_1_0.xml")
@@ -46,9 +46,9 @@ def set_qpos(root_pos=ROOT_POS, root_ori=ROOT_ORI, dof_pos=DOF_POS):
     return qpos
 
 if __name__ == '__main__':
-    motion_data = np.load(MOTION_SOURCE, allow_pickle=True).item()
-    # motion_data.keys()
-    # >>> dict_keys(['file_name', 'fps', 'time_length', 'num_frames', 'root_pos', 'root_rot', 'dof_pos'])
+    motion_data = np.load(MOTION_SOURCE, allow_pickle=True)
+    # motion_data.shape
+    # >>> (length, 36)
 
     # import pdb; pdb.set_trace()
     # exit()
@@ -75,14 +75,14 @@ if __name__ == '__main__':
                 # mj_step can be replaced with code that also evaluates
                 # a policy and applies a control signal before stepping the physics.
 
-                dof_pos = motion_data['dof_pos'][index].copy()
-                root_pos = motion_data['root_pos'][index].copy()
-                root_ori = motion_data['root_rot'][index].copy()
+                dof_pos = motion_data[:, 0: 29][index].copy()
+                root_pos = motion_data[:, 29: 32][index].copy()
+                root_ori = motion_data[:, 32: 36][index].copy()
                 root_pos[2] += 1.
 
                 data.qpos = set_qpos(root_pos=root_pos, root_ori=root_ori, dof_pos=dof_pos)
                 index += 1
-                index %= motion_data['num_frames']
+                index %= motion_data.shape[0]
                 # data.qpos[7: ] = set_qpos()[7: ]
                 # data.qpos = set_qpos()
 
