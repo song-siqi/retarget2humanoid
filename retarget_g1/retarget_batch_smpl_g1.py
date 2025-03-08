@@ -20,29 +20,16 @@ from scipy.spatial.transform import Rotation as R
 from utils.torch_h1_humanoid_batch import Humanoid_Batch_H1
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# DATA_ROOT_FOLDER1 = '/data/kinematic_smpl/'
-# DATA_ROOT_FOLDER1 = '/data/siqisong_share/tease_smpl/'
-# DATA_ROOT_FOLDER1 = '/data/siqisong_share/demo_smpl_1105/'
-# DATA_ROOT_FOLDER1 = '/data/siqisong_share/pipeline_demo_data_1108/'
-# DATA_ROOT_FOLDER1 = '/data/UH1/human_pose/youtube/'
-DATA_ROOT_FOLDER1 = './retarget_input/'
-DATA_ROOT_FOLDER2 = '/data/charades_smpl/'
-DATA_ROOT_FOLDER3 = '/data/kinematic_smpl_2/'
+# DATA_ROOT_FOLDER  = './retarget_input/'
+# DATA_ROOT_FOLDER = '/data/UH1/human_pose/youtube/'
+# DATA_ROOT_FOLDER = '/data/UH1/human_pose/charades/'
+DATA_ROOT_FOLDER = '/data/UH1/human_pose/kinetics700/'
 
-BETAS_PATH = './betas_param/betas_param_r5_default_tpose_smpl.npy'
-# OUTPUT_FOLDER = '/data/siqisong_share/smpl_scale_loaded/'
-# OUTPUT_FOLDER = '/data/siqisong_share/tease_smpl/'
-# OUTPUT_FOLDER = '/data/siqisong_share/demo_smpl_1105/'
-# OUTPUT_FOLDER = '/data/siqisong_share/pipeline_demo_data_1108/'
-# OUTPUT_FOLDER = '/data/UH1/humanoid_keypoint/temp/'
-OUTPUT_FOLDER = './retarget_output/'
+OUTPUT_FOLDER = '/data/UH1/humanoid_keypoint_g1/temp/'
+# OUTPUT_FOLDER = './retarget_output/'
 
-# RESULT_FOLDER = '/data/siqisong_share/smpl_scale_retarget/'
-# RESULT_FOLDER = '/data/siqisong_share/tease_retargeted/'
-# RESULT_FOLDER = '/data/siqisong_share/demo_result_1105/'
-# RESULT_FOLDER = '/data/siqisong_share/pipeline_demo_retarget_1108/'
-# RESULT_FOLDER = '/data/UH1/humanoid_keypoint/youtube/'
-RESULT_FOLDER = './retarget_output/'
+RESULT_FOLDER = '/data/UH1/humanoid_keypoint_g1/youtube/'
+# RESULT_FOLDER = './retarget_output/'
 
 BETAS_PATH = './betas_param/betas_r5_smpl_g1_neu2.npy' # './betas_param/betas_param_r5_robot_tpose.npy'
 HUMANOID_PATH = './humanoid_model/g1/g1_29dof_rev_1_0.xml'
@@ -593,7 +580,7 @@ class BatchG1RetargetKeypoint(G1RetargetKeypoint):
         self.init_robot(mjcf_file=HUMANOID_PATH)
 
         # retargeting parameters
-        self.num_iterations = 2001
+        self.num_iterations = 3001
     
     def init_gt(self, motion_gts):
         '''
@@ -732,7 +719,7 @@ if __name__ == '__main__':
     # parser.add_argument('--output_root', type=str, default='data/retarget_smpl')
     # parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--device', type=str, default='cpu')
-    parser.add_argument('--folder', type=str, default='1')
+    parser.add_argument('--folder', type=int, default=0)
     parser.add_argument('--slice', type=int, default=0)
     args = parser.parse_args()
     device = args.device
@@ -740,16 +727,7 @@ if __name__ == '__main__':
     ''' Pre-retargeting Process '''
     
     # get data list from data root folder
-    if args.folder == '1':
-        motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER1)
-    elif args.folder == '2':
-        motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER2)
-    elif args.folder == '3':
-        motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER3)
-    else:
-        raise ValueError('Invalid folder number')
-    # motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER1)
-    # motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER2)
+    motions_list = organize_data_list(data_root=DATA_ROOT_FOLDER)
     
     # split the list into 5 parts and select the part wanted
     def split_list(lst, k):
@@ -779,13 +757,8 @@ if __name__ == '__main__':
     #     device=device)
     # exit()
 
-    if args.folder == '1':
-        _to_save_name = 'keypoint_labels_' + str(_slice) + '.pkl'
-        keypoint_save_path = os.path.join(OUTPUT_FOLDER, _to_save_name)
-    elif args.folder == '2':
-        keypoint_save_path = os.path.join(OUTPUT_FOLDER, 'keypoint_labels_7.pkl')
-    elif args.folder == '3':
-        keypoint_save_path = os.path.join(OUTPUT_FOLDER, 'keypoint_labels_8.pkl')
+    _to_save_name = 'keypoint_labels_' + str(args.folder) + '_' + str(_slice) + '.pkl'
+    keypoint_save_path = os.path.join(OUTPUT_FOLDER, _to_save_name)
     
     if os.path.exists(keypoint_save_path):
         print("Loading GT keypoint labels ...")
