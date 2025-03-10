@@ -28,7 +28,9 @@ DATA_ROOT_FOLDER = '/data/UH1/human_pose/kinetics700/'
 OUTPUT_FOLDER = '/data/UH1/humanoid_keypoint_g1/temp/'
 # OUTPUT_FOLDER = './retarget_output/'
 
-RESULT_FOLDER = '/data/UH1/humanoid_keypoint_g1/youtube/'
+# RESULT_FOLDER = '/data/UH1/humanoid_keypoint_g1/youtube/'
+# RESULT_FOLDER = '/data/UH1/humanoid_keypoint_g1/charades/'
+RESULT_FOLDER = '/data/UH1/humanoid_keypoint_g1/kinetics700/'
 # RESULT_FOLDER = './retarget_output/'
 
 BETAS_PATH = './betas_param/betas_r5_smpl_g1_neu2.npy' # './betas_param/betas_param_r5_robot_tpose.npy'
