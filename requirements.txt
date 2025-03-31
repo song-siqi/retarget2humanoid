@@ -12,3 +12,4 @@ pillow==10.4.0
 pytorch_kinematics==0.7.2
 easydict
 chumpy
+joblib
