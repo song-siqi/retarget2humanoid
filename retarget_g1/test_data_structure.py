@@ -121,6 +121,7 @@ if __name__ == '__main__':
     # import pdb; pdb.set_trace()
     # data[list(data.keys())[0]].keys()
     # >>> dict_keys(['root_trans_offset', 'pose_aa', 'dof', 'root_rot', 'fps'])
+    ## NOTE：578 here is the number of frames in the retargeted data
     # data[list(data.keys())[0]]['root_trans_offset'].shape
     # >>> (578, 3)
     # data[list(data.keys())[0]]['pose_aa'].shape
@@ -208,11 +209,12 @@ if __name__ == '__main__':
         "fps": 20
     }
     
-    print(root_trans_offset_dump.shape)
+    ## NOTE：219 here is the number of frames in the retargeted data
+    # print(root_trans_offset_dump.shape)
     # >>> (219, 3)
-    print(pose_aa_dump.shape)
+    # print(pose_aa_dump.shape)
     # >>> (219, 30, 3)
-    print(dof_dump.shape)
+    # print(dof_dump.shape)
     # >>> (219, 29)
-    print(root_rot_dump.shape)
+    # print(root_rot_dump.shape)
     # >>> (219, 4)
