@@ -169,12 +169,50 @@ if __name__ == '__main__':
     ).fk_batch(
         pose=pose_batch.cpu(),
         trans=root_trans.unsqueeze(0).cpu(),
-        convert_to_mat=True,
-        return_full=True,
+        # convert_to_mat=True,
+        # return_full=True,
         dt=_forward.dt)
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     # output.keys()
     # >>> dict_keys(['global_translation', 'global_rotation_mat', 'global_rotation', 'local_rotation',
     #                'global_root_velocity', 'global_root_angular_velocity', 'global_angular_velocity',
     #                'global_velocity', 'dof_pos', 'dof_vels', 'fps'])
+
+    ## NOTE: The output below is given due to the original processing of the data in OmniH2O repo.
+    root_trans_offset_dump = root_trans.clone()
+    root_trans_offset_dump[..., 2] -= output.global_translation[..., 2].min().item() - 0.08
+    root_trans_offset_dump = root_trans_offset_dump.squeeze().cpu().detach().numpy()
+
+    # dof_pos (np.array) is the retargeting output / model output, there is no need for altering
+    dof_dump = dof_pos.copy()
+
+    # in OmniH2O repo:
+    #   pose_aa_dump = pose_aa_h1_new.squeeze().cpu().detach().numpy()
+    #   pose_aa_h1_new = torch.cat([gt_root_rot[None, :, None], h1_rotation_axis * dof_pos_new, torch.zeros((1, N, 2, 3)).to(device)], axis = 2)
+    #   fk_return = h1_fk.fk_batch(pose_aa_h1_new, root_trans_offset[None, ])
+    # so pose_aa_dump is the input of fk_batch
+    pose_aa_h1_new = pose_batch.clone()
+    pose_aa_dump = pose_aa_h1_new.squeeze().cpu().detach().numpy()
+
+    # root_rot_dump = R.from_rotvec(gt_root_rot.cpu().numpy()).as_quat() in OmniH2O repo,
+    # while gt_root_rot is _root_rot = R.from_quat(root_rot).as_rotvec() here,
+    # so in fact root_rot_dump is the original quat in root_rot
+    root_rot_dump = root_rot.copy()
+
+    data_dump = {
+        "root_trans_offset": root_trans_offset_dump,
+        "pose_aa": pose_aa_dump,
+        "dof": dof_dump,
+        "root_rot": root_rot_dump,
+        "fps": 20
+    }
+    
+    print(root_trans_offset_dump.shape)
+    # >>> (219, 3)
+    print(pose_aa_dump.shape)
+    # >>> (219, 30, 3)
+    print(dof_dump.shape)
+    # >>> (219, 29)
+    print(root_rot_dump.shape)
+    # >>> (219, 4)
